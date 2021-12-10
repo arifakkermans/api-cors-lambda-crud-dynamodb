@@ -17,5 +17,15 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
     // const queue = new sqs.Queue(this, 'ApiCorsLambdaCrudDynamodbQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+    const dynamoTable = new Dynamodb.Table(this, 'Books', {
+      tableName: 'BooksTable',
+      partitionKey: {
+        name: 'isbn',
+        type: Dynamodb.AttributeType.STRING
+      },
+      readCapacity: 1,
+      writeCapacity: 1,
+      removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
+    });
   }
 }
