@@ -1,6 +1,11 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import {
+  aws_lambda as Lambda,
+  aws_dynamodb as Dynamodb,
+  Stack, StackProps, RemovalPolicy
+} from 'aws-cdk-lib';
+import { IResource, LambdaIntegration, MockIntegration, PassthroughBehavior, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { join } from 'path'
 
 export class ApiCorsLambdaCrudDynamodbStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
