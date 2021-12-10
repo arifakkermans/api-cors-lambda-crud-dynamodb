@@ -27,5 +27,12 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
       writeCapacity: 1,
       removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
     });
+
+    const baseLambdaProps = {
+      environment: {
+        table: DYNAMO_TABLE.tableName
+      },
+      runtime: Lambda.Runtime.PYTHON_3_8
+    };
   }
 }
