@@ -27,12 +27,41 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
       writeCapacity: 1,
       removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
     });
-
+  
+    // Define Lambda initial configuration
     const baseLambdaProps = {
       environment: {
         table: dynamoTable.tableName
       },
       runtime: Lambda.Runtime.PYTHON_3_8
     };
+
+    // Create a Lambda function for each of the CRUD operations
+    const getBookLambda = new Lambda.Function(this, 'getOneBookFunction', {
+      code: Lambda.Code.fromAsset(join(__dirname, '../src')),
+      handler: 'get_book.lambda_handler',
+      ...baseLambdaProps,
+    });
+    const listBooksLambda = new Lambda.Function(this, 'getAllBookssFunction', {
+      code: Lambda.Code.fromAsset(join(__dirname, '../src')),
+      handler: 'list_books.lambda_handler',
+      ...baseLambdaProps,
+    });
+    const createBookLambda = new Lambda.Function(this, 'createBookFunction', {
+      code: Lambda.Code.fromAsset(join(__dirname, '../src')),
+      handler: 'create_book.lambda_handler',
+      ...baseLambdaProps,
+    });
+    const updateBookLambda = new Lambda.Function(this, 'updateBookFunction', {
+      code: Lambda.Code.fromAsset(join(__dirname, '../src')),
+      handler: 'update_books.lambda_handler',
+      ...baseLambdaProps,
+    });
+    const deleteBookLambda = new Lambda.Function(this, 'deleteBookFunction', {
+      code: Lambda.Code.fromAsset(join(__dirname, '../src')),
+      handler: 'delete_book.lambda_handler',
+      ...baseLambdaProps,
+    });
+
   }
 }
