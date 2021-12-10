@@ -30,7 +30,7 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
 
     const baseLambdaProps = {
       environment: {
-        table: DYNAMO_TABLE.tableName
+        table: dynamoTable.tableName
       },
       runtime: Lambda.Runtime.PYTHON_3_8
     };
