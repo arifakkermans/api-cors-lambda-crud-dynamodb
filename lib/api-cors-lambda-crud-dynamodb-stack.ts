@@ -63,5 +63,12 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
       ...baseLambdaProps,
     });
 
+    // Grant the Lambda function read and write access to the DynamoDB table
+    // TODO: Use least privilege principle
+    dynamoTable.grantReadWriteData(getBookLambda);
+    dynamoTable.grantReadWriteData(listBooksLambda);
+    dynamoTable.grantReadWriteData(createBookLambda);
+    dynamoTable.grantReadWriteData(updateBookLambda);
+    dynamoTable.grantReadWriteData(deleteBookLambda);
   }
 }
