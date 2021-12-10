@@ -73,8 +73,8 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
 
     // Integrate the Lambda functions with the API Gateway resource
     const getBookIntegration = new LambdaIntegration(getBookLambda);
-    const createBookIntegration = new LambdaIntegration(listBooksLambda);
-    const listBookIntegration = new LambdaIntegration(createBookLambda);
+    const createBookIntegration = new LambdaIntegration(createBookLambda);
+    const listBookIntegration = new LambdaIntegration(listBooksLambda);
     const updateBookIntegration = new LambdaIntegration(updateBookLambda);
     const deleteBookIntegration = new LambdaIntegration(deleteBookLambda);
 
