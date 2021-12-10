@@ -78,5 +78,9 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
     const updateBookIntegration = new LambdaIntegration(updateBookLambda);
     const deleteBookIntegration = new LambdaIntegration(deleteBookLambda);
 
+    // Create an API Gateway resource for each of the CRUD operations
+    const api = new RestApi(this, 'bookApi', {
+      restApiName: 'Book API Service'
+    });
   }
 }
