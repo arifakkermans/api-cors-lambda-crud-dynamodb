@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOG_LEVEL", "DEBUG"))
 TABLE_NAME = os.environ.get('table')
 dynamodb_client = boto3.client('dynamodb')
-
+dynamodb_parser = models.DynamoParser()
 
 def lambda_handler(event, context):
     logger.info("Looking for events")
@@ -48,8 +48,9 @@ def lambda_handler(event, context):
         logger.info(f'Book is: {book}')
         response = {
             "statusCode": 200,
-            "body": json.dumps(book)
+            "body": json.dumps(dynamodb_parser.unmarshal_dynamodb_json(book))
         }
+
     else:
         validation_error = models.InvalidUsage(
             message=f"no isbn found with id {isbn}", status_code=404
