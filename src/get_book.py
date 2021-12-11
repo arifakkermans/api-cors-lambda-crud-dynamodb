@@ -1,5 +1,5 @@
 """
-This Lambda functions returns a book by isbn.
+This Lambda function returns a book by isbn.
 """
 import json
 import logging

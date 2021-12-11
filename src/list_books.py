@@ -1,5 +1,5 @@
 """
-This Lambda functions returns all books in the DB.
+This Lambda function returns all books in the DB.
 """
 import json
 import logging

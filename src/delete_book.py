@@ -1,5 +1,5 @@
 """
-This Lambda functions deletes an existing book by isbn.
+This Lambda function deletes an existing book by isbn.
 """
 import json
 import logging

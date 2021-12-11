@@ -1,5 +1,5 @@
 """
-This Lambda functions updates an existing book by isbn.
+This Lambda function updates an existing book by isbn.
 """
 import json
 import logging
