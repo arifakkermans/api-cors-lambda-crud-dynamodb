@@ -27,7 +27,7 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
       writeCapacity: 1,
       removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
     });
-  
+
     // Define Lambda initial configuration
     const baseLambdaProps = {
       environment: {
@@ -54,7 +54,7 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
     });
     const updateBookLambda = new Lambda.Function(this, 'updateBookFunction', {
       code: Lambda.Code.fromAsset(join(__dirname, '../src')),
-      handler: 'update_books.lambda_handler',
+      handler: 'update_book.lambda_handler',
       ...baseLambdaProps,
     });
     const deleteBookLambda = new Lambda.Function(this, 'deleteBookFunction', {
@@ -73,8 +73,8 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
 
     // Integrate the Lambda functions with the API Gateway resource
     const getBookIntegration = new LambdaIntegration(getBookLambda);
-    const createBookIntegration = new LambdaIntegration(listBooksLambda);
-    const listBookIntegration = new LambdaIntegration(createBookLambda);
+    const createBookIntegration = new LambdaIntegration(createBookLambda);
+    const listBookIntegration = new LambdaIntegration(listBooksLambda);
     const updateBookIntegration = new LambdaIntegration(updateBookLambda);
     const deleteBookIntegration = new LambdaIntegration(deleteBookLambda);
 
@@ -85,18 +85,18 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
 
     const items = api.root.addResource('books');
     items.addMethod('GET', listBookIntegration);
-    items.addMethod('POST', createBookIntegration);
     addCorsOptions(items);
 
     const singleItem = items.addResource('{id}');
+    singleItem.addMethod('POST', createBookIntegration);
     singleItem.addMethod('GET', getBookIntegration);
-    singleItem.addMethod('PATCH', updateBookIntegration);
+    singleItem.addMethod('PUT', updateBookIntegration);
     singleItem.addMethod('DELETE', deleteBookIntegration);
     addCorsOptions(singleItem);
 
   }
 }
- // Add CORS to restrict cross-origin HTTP requests
+// Add CORS to restrict cross-origin HTTP requests
 export function addCorsOptions(apiResource: IResource) {
   apiResource.addMethod('OPTIONS', new MockIntegration({
     integrationResponses: [{
