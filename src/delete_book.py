@@ -23,6 +23,8 @@ def lambda_handler(event, context):
         "statusCode": 500,
         "body": f"An error occured while deleting book"
     }
+
+    # Validate if query parameter is not empty
     if event['pathParameters'] is None:
         validation_error = models.InvalidUsage(
             message="no query param provided").create_response_body()
@@ -30,11 +32,7 @@ def lambda_handler(event, context):
 
     isbn = event['pathParameters']['id']
 
-    if not isbn:
-        validation_error = models.InvalidUsage(
-            message="no query param provided").create_response_body()
-        return validation_error
-
+    # Validate if isbn consists of 13 digits
     if len(isbn) != 13 or not isbn.isdigit():
         validation_error = models.InvalidUsage(
             message=f"invalid isbn {isbn} must be a 13char digit"
