@@ -69,4 +69,5 @@ def lambda_handler(event, context):
             "body": f"Location: /books/{book['isbn']}"
         }
 
+    # Return 201 created with the location of the book
     return response

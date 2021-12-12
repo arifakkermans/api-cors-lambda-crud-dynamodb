@@ -38,4 +38,5 @@ def lambda_handler(event, context):
         "body": json.dumps(books)
     }
 
+    # Return all books
     return response

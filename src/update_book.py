@@ -65,10 +65,11 @@ def lambda_handler(event, context):
         ReturnValues="UPDATED_NEW"
     )
 
-    # If updation is successful for post
+    # If update is successful for post
     if res['ResponseMetadata']['HTTPStatusCode'] == 200:
         response = {
             "statusCode": 200,
         }
 
+    # Return 200 ok
     return response

@@ -49,4 +49,6 @@ def lambda_handler(event, context):
         response = {
             "statusCode": 204
         }
+
+    # Return 204 deleted
     return response

@@ -5,19 +5,18 @@ Models and helper functions.
 import json
 import logging
 
+
 class InvalidUsage(Exception):
     """
     Create custom HTTP responses.
     """
     status_code = 400
 
-    def __init__(self, message, status_code=None, payload=None):
+    def __init__(self, message, status_code=None, payload=None, logger=None):
         """
-        Constructor.
-
         Args:
             self: str representation
-            message: str 
+            message: str response body 
             status_code: int (optional)
             payload: 
 
@@ -27,6 +26,7 @@ class InvalidUsage(Exception):
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+        self.logger = logger or logging
 
     def create_response_body(self):
         """
@@ -45,19 +45,43 @@ class InvalidUsage(Exception):
         }
         return rb
 
+
 class DynamoParser:
-    def __init__(self,logger=None):
+    """
+    DynamoDB json parser to load and dump strings of Dynamodb 
+    format to a Python object.
+    """
+
+    def __init__(self, logger=None):
         self.logger = logger or logging
 
     def unmarshal_dynamodb_json(self, node):
+        """
+        Cast data to dict and unmarshal value.
+
+         Args:
+            node: str representation in DynamoDB json format  
+
+        Returns:
+            dict of the DynamoDB type
+        """
         data = dict({})
         data['M'] = node
         return self.__unmarshal_value(data)
-    
+
     def __unmarshal_value(self, node):
+        """
+        Cast data to dict and unmarshal value.
+
+         Args:
+            node: dict representation in DynamoDB json format
+
+        Returns:
+            parsed dict
+        """
         if type(node) is not dict:
             return node
-    
+
         for key, value in node.items():
             # S – String - return string
             # N – Number - return int or float (if includes '.')
