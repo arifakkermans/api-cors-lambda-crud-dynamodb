@@ -23,8 +23,8 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
         name: 'isbn',
         type: Dynamodb.AttributeType.STRING
       },
-      readCapacity: 1,
-      writeCapacity: 1,
+      readCapacity: 10,
+      writeCapacity: 10,
       removalPolicy: RemovalPolicy.DESTROY, // NOT recommended for production code
     });
 
