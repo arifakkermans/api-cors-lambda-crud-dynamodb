@@ -23,11 +23,19 @@ Run `cdk deploy`. This will deploy / redeploy your Stack to your AWS Account.
 
 After the deployment you will see the API's URL, which represents the url you can then use.
 
-# Welcome to your CDK TypeScript project!
+## The Component Structure
 
-This is a blank project for TypeScript development with CDK.
+The whole component contains:
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+- An API, with CORS enabled on all HTTTP Methods. (Use with caution, for production apps you will want to enable only a certain domain origin to be able to query your API.)
+- Lambda pointing to `src/create_book.py`, containing code for __storing__ a book  into the DynamoDB table.
+- Lambda pointing to `src/delete_book.py`, containing code for __deleting__ books from the DynamoDB table.
+- Lambda pointing to `src/get_books.py`, containing code for __getting all books__ from the DynamoDB table.
+- Lambda pointing to `src/get_book.py`, containing code for __getting a book__ from the DynamoDB table.
+- Lambda pointing to `src/update_book.py`, containing code for __updating a book__ in the DynamoDB table.
+- A DynamoDB table `books` that stores the data.
+- Five `LambdaIntegrations` that connect these Lambdas to the API.
+
 
 ## Useful commands
 
