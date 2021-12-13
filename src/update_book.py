@@ -6,6 +6,7 @@ import logging
 import os
 
 import boto3
+from botocore.exceptions import ClientError
 
 import models
 
@@ -16,8 +17,9 @@ dynamodb_client = boto3.client('dynamodb')
 
 
 def lambda_handler(event, context):
+    logger.info("Looking for events")
+    logger.info("- - - - - - - - - - - - - - - - - - -")
     logger.info(f'Incoming request is: {event}')
-
     # Set the default error response
     response = {
         "statusCode": 500,
@@ -30,12 +32,22 @@ def lambda_handler(event, context):
             message="no query param provided").create_response_body()
         return validation_error
 
-    isbn = event['pathParameters']['id']
+    isbn = event['pathParameters']['isbn']
 
     # Validate if isbn consists of 13 digits
     if len(isbn) != 13 or not isbn.isdigit():
         validation_error = models.InvalidUsage(
             message=f"invalid isbn {isbn} must be a 13char digit"
+        ).create_response_body()
+        return validation_error
+
+    # Validate if request body matches with our schema
+    try:
+        request_body = models.book_request_body_from_dict(
+            json.loads(event["body"]))
+    except AssertionError:
+        validation_error = models.InvalidUsage(
+            message="request body malformed"
         ).create_response_body()
         return validation_error
 
@@ -45,31 +57,43 @@ def lambda_handler(event, context):
             message="no request body provided").create_response_body()
         return validation_error
 
-    book_str = event['body']
-    book = json.loads(book_str)
+    try:
+        res = dynamodb_client.update_item(
+            TableName=TABLE_NAME,
+            Key={
+                'isbn': {'S': isbn}
+            },
+            ConditionExpression='attribute_exists(isbn)',
+            UpdateExpression="set book_name=:b, authors=:a, languages=:l, countries=:c, number_of_pages=:n, release_date=:r",
+            ExpressionAttributeValues={
+                ":b": {"S": request_body.name},
+                ":a": {"S": request_body.authors},
+                ":l": {"S": request_body.languages},
+                ":c": {"S": request_body.countries},
+                ":n": {"S": request_body.number_of_pages},
+                ":r": {"S": request_body.release_date}
 
-    res = dynamodb_client.update_item(
-        TableName=TABLE_NAME,
-        Key={
-            'isbn': {'S': isbn}
-        },
-        UpdateExpression="set authors=:a, languages=:l, countries=:c, number_of_pages=:n, release_date=:r",
-        ExpressionAttributeValues={
-            ":a": {"S": book['authors']},
-            ":l": {"S": book['languages']},
-            ":c": {"S": book['countries']},
-            ":n": {"S": book['numberOfPages']},
-            ":r": {"S": book['releaseDate']}
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+    except ClientError as error:
+        if error.response['Error']['Code'] == 'ConditionalCheckFailedException':
+            validation_error = models.InvalidUsage(
+                message="Book does not exist", status_code=404
+            ).create_response_body()
+            return validation_error
 
-        },
-        ReturnValues="UPDATED_NEW"
-    )
-
-    # If update is successful for post
+    # Check if put is successful
     if res['ResponseMetadata']['HTTPStatusCode'] == 200:
         response = {
-            "statusCode": 200,
+            "statusCode": 201,
+            "body": f"Location: /books/{isbn}"
         }
+    else:
+        validation_error = models.InvalidUsage(
+            message=f"an error occurred putting isbn {isbn}"
+        ).create_response_body()
+        return validation_error  
 
     # Return 200 ok
     return response
