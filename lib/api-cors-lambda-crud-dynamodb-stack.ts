@@ -83,16 +83,17 @@ export class ApiCorsLambdaCrudDynamodbStack extends Stack {
       restApiName: 'Book API Service'
     });
 
-    const items = api.root.addResource('books');
-    items.addMethod('GET', listBookIntegration);
-    addCorsOptions(items);
+    const books = api.root.addResource('books');
+    books.addMethod('GET', listBookIntegration);
+    books.addMethod('POST', createBookIntegration);
+    addCorsOptions(books);
 
-    const singleItem = items.addResource('{id}');
-    singleItem.addMethod('POST', createBookIntegration);
-    singleItem.addMethod('GET', getBookIntegration);
-    singleItem.addMethod('PUT', updateBookIntegration);
-    singleItem.addMethod('DELETE', deleteBookIntegration);
-    addCorsOptions(singleItem);
+    const book = books.addResource('{isbn}');
+
+    book.addMethod('GET', getBookIntegration);
+    book.addMethod('PUT', updateBookIntegration);
+    book.addMethod('DELETE', deleteBookIntegration);
+    addCorsOptions(book);
 
   }
 }

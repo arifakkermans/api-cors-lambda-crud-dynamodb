@@ -15,6 +15,7 @@ TABLE_NAME = os.environ.get('table')
 dynamodb_client = boto3.client('dynamodb')
 dynamodb_parser = models.DynamoParser()
 
+
 def lambda_handler(event, context):
     logger.info("Looking for events")
     logger.info("- - - - - - - - - - - - - - - - - - -")
@@ -25,18 +26,26 @@ def lambda_handler(event, context):
         "statusCode": 500,
         "body": "An error occured while getting book."
     }
+
     # Validate if event is not none
     if event['pathParameters'] is None:
         validation_error = models.InvalidUsage(
             message="no query param provided").create_response_body()
         return validation_error
 
-    isbn = event['pathParameters']['id']
+    isbn = event['pathParameters']['isbn']
 
     # Validate if isbn consists of 13 digits
     if len(isbn) != 13 or not isbn.isdigit():
         validation_error = models.InvalidUsage(
             message=f"invalid isbn {isbn} must be a 13char digit"
+        ).create_response_body()
+        return validation_error
+
+    teapot = "9011301200501161520"
+    if isbn == teapot:
+        validation_error = models.InvalidUsage(
+            message="I'm a teapot", status_code=418
         ).create_response_body()
         return validation_error
 

@@ -1,11 +1,13 @@
 """
 This Lambda function creates a new book.
 """
+import datetime
 import json
 import logging
 import os
 
 import boto3
+from botocore.exceptions import ClientError
 
 import models
 
@@ -26,48 +28,68 @@ def lambda_handler(event, context):
         "body": "An error occured while creating the book."
     }
 
-    # Validate if query parameter is not empty
-    if event['pathParameters'] is None:
-        validation_error = models.InvalidUsage(
-            message="no query param provided").create_response_body()
-
-        return validation_error
-
     # Validate if body is not empty
     if event['body'] is None:
         validation_error = models.InvalidUsage(
             message="no request body provided").create_response_body()
         return validation_error
-    
-    book_str = event['body']
-    book = json.loads(book_str)
-    isbn = book['isbn']
 
-    # Validate if isbn consists of 13 digits
-    if len(isbn) != 13 or not isbn.isdigit():
+    # Validate if request body matches with our schema
+    try:
+        request_body = models.book_request_body_from_dict(
+            json.loads(event["body"]))
+        # Validate if releasedate matches the ISO 8601 standard
+        valid = models.validate_releasedate(request_body.release_date)
+        if not valid:
+            validation_error = models.InvalidUsage(
+                message="releasedate does not match YYYY-MM-DD (ISO 8601)"
+            ).create_response_body()
+            return validation_error
+    except AssertionError:
         validation_error = models.InvalidUsage(
-            message=f"invalid isbn {isbn} must be a 13char digit"
+            message="request body malformed"
         ).create_response_body()
         return validation_error
 
-    res = dynamodb_client.put_item(
-        TableName=TABLE_NAME,
-        Item={
-            "isbn": {"S": book['isbn']},
-            "authors": {"S": book['authors']},
-            "languages": {"S": book['languages']},
-            "countries": {"S": book['countries']},
-            "number_of_pages": {"S": book['numberOfPages']},
-            "release_date": {"S": book['releaseDate']}
-        }
-    )
+    # Validate if isbn consists of 13 digits
+    if len(request_body.isbn) != 13 or not request_body.isbn.isdigit():
+        validation_error = models.InvalidUsage(
+            message=f"invalid isbn {request_body.isbn} must be a 13char digit"
+        ).create_response_body()
+        return validation_error
 
-    # If creation is successful
+    try:
+        res = dynamodb_client.put_item(
+            TableName=TABLE_NAME,
+            Item={
+                "isbn": {"S": request_body.isbn},
+                "book_name": {"S": request_body.name},
+                "authors": {"S": request_body.authors},
+                "languages": {"S": request_body.languages},
+                "countries": {"S": request_body.countries},
+                "number_of_pages": {"S": request_body.number_of_pages},
+                "release_date": {"S": request_body.release_date}
+            },
+            ConditionExpression='attribute_not_exists(isbn)'
+        )
+    except ClientError as error:
+        if error.response['Error']['Code'] == 'ConditionalCheckFailedException':
+            validation_error = models.InvalidUsage(
+                message="Book already exist", status_code=403
+            ).create_response_body()
+            return validation_error
+
+    # Check if post is successful
     if res['ResponseMetadata']['HTTPStatusCode'] == 200:
         response = {
             "statusCode": 201,
-            "body": f"Location: /books/{book['isbn']}"
+            "body": f"Location: /books/{request_body.isbn}"
         }
+    else:
+        validation_error = models.InvalidUsage(
+            message=f"an error occurred putting isbn {request_body.isbn}"
+        ).create_response_body()
+        return validation_error
 
     # Return 201 created with the location of the book
     return response
