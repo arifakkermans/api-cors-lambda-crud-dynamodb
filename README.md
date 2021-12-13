@@ -36,6 +36,11 @@ The whole component contains:
 - A DynamoDB table `books` that stores the data.
 - Five `LambdaIntegrations` that connect these Lambdas to the API.
 
+## Caveats
+
+* The Countries and Languages properties cannot have values stored in an array.
+* REST API is not documented in API Gateway.
+* No tests are written.
 
 ## Useful commands
 

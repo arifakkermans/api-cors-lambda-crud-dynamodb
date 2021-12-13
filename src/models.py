@@ -124,6 +124,7 @@ class DynamoParser:
                     data.append(self.__unmarshal_value(item))
                 return data
 
+
 def validate_releasedate(date):
     year, month, day = date.split('-')
     valid = True
@@ -134,7 +135,9 @@ def validate_releasedate(date):
 
     return valid
 
+
 T = TypeVar("T")
+
 
 def from_str(x: Any) -> str:
     assert isinstance(x, str)
