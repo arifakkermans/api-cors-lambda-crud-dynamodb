@@ -16,9 +16,11 @@ TABLE_NAME = os.environ.get('table')
 dynamodb_client = boto3.client('dynamodb')
 dynamodb_parser = models.DynamoParser()
 
-def lambda_handler(event, context):
-    logger.info(f'Incoming request is: {event}')
 
+def lambda_handler(event, context):
+    logger.info("Looking for events")
+    logger.info("- - - - - - - - - - - - - - - - - - -")
+    logger.info(f'Incoming request is: {event}')
     # Set the default error response
     response = {
         "statusCode": 500,
