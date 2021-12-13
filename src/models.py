@@ -4,6 +4,7 @@ Models and helper functions.
 
 import json
 import logging
+import datetime
 
 from dataclasses import dataclass
 from typing import Any, TypeVar, Type, cast
@@ -123,9 +124,17 @@ class DynamoParser:
                     data.append(self.__unmarshal_value(item))
                 return data
 
+def validate_releasedate(date):
+    year, month, day = date.split('-')
+    valid = True
+    try:
+        datetime.datetime(int(year), int(month), int(day))
+    except ValueError:
+        valid = False
+
+    return valid
 
 T = TypeVar("T")
-
 
 def from_str(x: Any) -> str:
     assert isinstance(x, str)
@@ -135,7 +144,6 @@ def from_str(x: Any) -> str:
 def to_class(c: Type[T], x: Any) -> dict:
     assert isinstance(x, c)
     return cast(Any, x).to_dict()
-
 
 @dataclass
 class BookRequestBody:

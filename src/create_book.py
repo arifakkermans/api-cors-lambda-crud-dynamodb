@@ -1,6 +1,7 @@
 """
 This Lambda function creates a new book.
 """
+import datetime
 import json
 import logging
 import os
@@ -37,6 +38,13 @@ def lambda_handler(event, context):
     try:
         request_body = models.book_request_body_from_dict(
             json.loads(event["body"]))
+        # Validate if releasedate matches the ISO 8601 standard
+        valid = models.validate_releasedate(request_body.release_date)
+        if not valid:
+            validation_error = models.InvalidUsage(
+                message="releasedate does not match YYYY-MM-DD (ISO 8601)"
+            ).create_response_body()
+            return validation_error
     except AssertionError:
         validation_error = models.InvalidUsage(
             message="request body malformed"
